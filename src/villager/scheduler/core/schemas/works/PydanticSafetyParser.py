@@ -32,12 +32,12 @@ def chat_with_safety_pydantic_output_parser(model: BaseChatModel, input_args: In
         )
         parser = PydanticOutputParser(pydantic_object=TaskStatusModel)
         promptTemplate = ChatPromptTemplate.from_messages([
-            ("system", "你是一名助手，请根据用户的问题和另一位工人的执行结果综合判断此任务状态如何，返回格式请严格遵循以下要求{format_instructions};"
-                       "(不要尝试去实际执行任务!)"
-                       "你有权限调用一些函数，另一位工人和你有同等权限，这有助于你判断其状态，下文会给你函数列表;"
+            ("system", "You are an assistant. Please comprehensively judge the status of this task based on the user's questions and another worker's execution results. The return format must strictly follow the following requirements {format_instructions};"
+                       "(Do not attempt to actually execute tasks!)"
+                       "You have permission to call some functions. Another worker has the same permissions as you, which helps you judge their status. The function list will be provided below;"
              ),
-            ("user", "任务简述:```{abstract}```;任务描述:```{description}```;执行结果:```{result}```;验收标准:{verification}"
-                     "函数列表:{func_list}")
+            ("user", "Task summary:```{abstract}```;Task description:```{description}```;Execution result:```{result}```;Acceptance criteria:{verification}"
+                     "Function list:{func_list}")
         ])
         func_list = self.tools_manager.list_func_json()
         input_args = {
