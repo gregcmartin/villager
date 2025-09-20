@@ -145,9 +145,9 @@ class TaskNode(Node):
         upper_chain: List[Node] = self._trm.get_upper_import_node_simple(self, window_n=3, window_m=6)
 
         if len(upper_chain) > 0:
-            # 含有上级或平级的前置任务
-            advices = f'你当前的任务是一个父任务中分出的子任务，以下我将提供给你当前任务的上游任务节点，从上到下代表从父节点到相邻节点的关系:'  # 覆盖
-            upper_chain.reverse()  # 栈序翻转
+            # Contains upper-level or same-level prerequisite tasks
+            advices = f'Your current task is a subtask split from a parent task. Below I will provide you with the upstream task nodes of your current task, representing the relationship from parent node to adjacent node from top to bottom:'  # Override
+            upper_chain.reverse()  # Stack order reversal
             for upper_node in upper_chain:
                 advices += f'\n{upper_node.task_pydantic_model}'
         advices += f'\n{rebranch_prompt}'
@@ -162,12 +162,12 @@ class TaskNode(Node):
                 self.task_pydantic_model.task_out_model = _task_model_out
                 return _task_model_out
             except TaskImpossibleException as e:
-                # 若下级任务产生任务不可能的错误，在此级捕获并重新分配任务分支
+                # If lower-level task generates impossible task error, catch at this level and reassign task branch
                 loguru.logger.warning(f"Task {self.id} {self.task_pydantic_model} is impossible, replan it.")
                 _lower_chain = self._trm.get_lower_chain_simple(self, 1)
-                assert len(_lower_chain) > 0, f"{self.id}的子节点失败了，但是并没有找到子节点"
+                assert len(_lower_chain) > 0, f"Child node of {self.id} failed, but no child node was found"
                 loguru.logger.debug(f'Removing {_lower_chain}[0]: {_lower_chain[0]}')
-                self._trm.remove_node(_lower_chain[0])  # 若一个节点同时有下和右方向的子节点，会先获取下节点，所以直接取第一个永远是应该删除的节点
+                self._trm.remove_node(_lower_chain[0])  # If a node has both down and right direction child nodes, it will get the down node first, so taking the first one is always the node that should be deleted
                 return self.execute()
         else:
             _direct_execute_result = self.direct_execute(advices, articles)
