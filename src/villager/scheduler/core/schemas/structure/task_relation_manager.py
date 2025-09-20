@@ -413,10 +413,10 @@ class TaskRelationManager:
         d -> f -> g -> h
         v
         e
-        如果我们查询h,n=2,m=2，应该是: a -> f -> g 的一个链
+        If we query h,n=2,m=2, it should be: a -> f -> g chain
         :param start_task:
-        :param window_n: 同级的最大回溯长度
-        :param window_m: 上级根节点的最大回溯长度
+        :param window_n: Maximum backtrack length at same level
+        :param window_m: Maximum backtrack length of upper root nodes
         :return:
         """
         result_chain: List[Node] = []
@@ -441,38 +441,38 @@ class TaskRelationManager:
                     cleaned_chain.append(result_chain[i])
             result_chain = cleaned_chain
 
-        loguru.logger.debug(f"从{start_task.id}获取到上级: {[item.id for item in result_chain]}")
+        loguru.logger.debug(f"Got upper level from {start_task.id}: {[item.id for item in result_chain]}")
         return result_chain
 
     def draw_graph(self, output_file: str = "graph.mermaid"):
         """
-        生成任务关系图，使用Mermaid格式输出
-        :param output_file: 输出文件名
+        Generate task relationship graph using Mermaid format output
+        :param output_file: Output filename
         :return:
         """
-        # 初始化Mermaid图，使用TD布局（Top-Down）
+        # Initialize Mermaid graph using TD layout (Top-Down)
         content = 'graph TD\n'
 
-        # 生成所有节点的定义
+        # Generate all node definitions
         for task_id in self.task_registry:
             task_label = self._get_task_from_id(task_id)
             safe_label = escape_mermaid_label(task_label)
             content += f'    n{task_id}["{safe_label}"]\n'
-        # 生成所有边（右和下方向）
+        # Generate all edges (right and down directions)
         for task_id in self.task_registry:
             relations = self.relationships.get(task_id, {})
             if not relations:
                 continue
-            # 处理右方向
+            # Handle right direction
             right_id = relations.get(Direction.RIGHT)
             if right_id is not None:
                 content += f'    n{task_id} --> n{right_id}\n'
-            # 处理下方向
+            # Handle down direction
             down_id = relations.get(Direction.DOWN)
             if down_id is not None:
                 content += f'    n{task_id} --> n{down_id}\n'
 
-        # 写入文件
+        # Write to file
         with open(output_file, 'w') as f:
             f.write(content)
         print(f"Mermaid graph saved to {output_file}")
@@ -480,59 +480,59 @@ class TaskRelationManager:
 
 def escape_mermaid_label(label: str) -> str:
     """
-    全面转义 Mermaid 节点标签中的特殊字符，确保生成的 Mermaid 语法安全且正确显示
+    Comprehensively escape special characters in Mermaid node labels to ensure safe and correct Mermaid syntax display
 
-    处理的字符包括：
-    - 双引号 " -> \"
-    - 换行符 \n -> 空格
-    - 回车符 \r -> 空格
-    - 制表符 \t -> 空格
-    - 反斜杠 \ -> \\
-    - HTML 特殊字符 (<, >, &, 等)
-    - Mermaid 关键字和特殊符号
-    - 控制字符 (ASCII 0-31, 127)
+    Characters handled include:
+    - Double quotes " -> \"
+    - Newline \n -> space
+    - Carriage return \r -> space
+    - Tab \t -> space
+    - Backslash \ -> \\
+    - HTML special characters (<, >, &, etc.)
+    - Mermaid keywords and special symbols
+    - Control characters (ASCII 0-31, 127)
     """
     if label is None:
         return ""
 
     label = str(label)
 
-    # 1. 处理 Mermaid 特殊语法字符
-    label = label.replace('\\', '')  # 反斜杠必须首先处理
-    label = label.replace('"', '')  # 双引号转义
-    label = label.replace('`', '')  # 反引号（代码块标记）
-    label = label.replace('\"', '')  # 双引号转义
-    label = label.replace('\`', '')  # 反引号（代码块标记）
+    # 1. Handle Mermaid special syntax characters
+    label = label.replace('\\', '')  # Backslash must be handled first
+    label = label.replace('"', '')  # Double quote escape
+    label = label.replace('`', '')  # Backtick (code block marker)
+    label = label.replace('\"', '')  # Double quote escape
+    label = label.replace('\`', '')  # Backtick (code block marker)
 
-    # 2. 处理空白字符
+    # 2. Handle whitespace characters
     label = label.replace('\n', ' ')
     label = label.replace('\r', ' ')
     label = label.replace('\t', ' ')
 
-    # 3. 移除或替换控制字符 (ASCII 0-31 和 127)
-    # 保留常见的可打印字符，替换其他控制字符为空格
+    # 3. Remove or replace control characters (ASCII 0-31 and 127)
+    # Keep common printable characters, replace other control characters with spaces
     cleaned_chars = []
     for char in label:
-        if 32 <= ord(char) <= 126 or ord(char) >= 128:  # 可打印ASCII和扩展字符
+        if 32 <= ord(char) <= 126 or ord(char) >= 128:  # Printable ASCII and extended characters
             cleaned_chars.append(char)
         else:
-            cleaned_chars.append(' ')  # 控制字符替换为空格
+            cleaned_chars.append(' ')  # Replace control characters with spaces
     label = ''.join(cleaned_chars)
 
-    # 4. 处理可能导致解析问题的特殊符号组合
-    # 避免注释符号
-    label = label.replace('<!--', '< !--')  # 防止HTML注释
-    label = label.replace('-->', '- ->')  # 防止箭头注释结束
+    # 4. Handle special symbol combinations that may cause parsing issues
+    # Avoid comment symbols
+    label = label.replace('<!--', '< !--')  # Prevent HTML comments
+    label = label.replace('-->', '- ->')  # Prevent arrow comment endings
 
-    # 5. 处理可能导致显示问题的HTML特殊字符
-    label = html.escape(label, quote=False)  # 转义 <, >, & 等，但不转义引号（我们已经处理了）
+    # 5. Handle HTML special characters that may cause display issues
+    label = html.escape(label, quote=False)  # Escape <, >, & etc., but don't escape quotes (we've handled them)
 
-    # 6. 限制长度（可选，防止过长标签影响显示）
+    # 6. Limit length (optional, prevent overly long labels from affecting display)
     max_length = 1000
     if len(label) > max_length:
         label = label[:max_length] + "..."
 
-    # 7. 处理连续空格（可选，美化显示）
+    # 7. Handle consecutive spaces (optional, beautify display)
     label = re.sub(r'\s+', ' ', label).strip()
 
     return label
@@ -573,7 +573,7 @@ if __name__ == '__main__':
 
 
     manager = TaskRelationManager()
-    # 使用字符串作为任务对象
+    # Use string as task object
     task_a = T("A")
     task_b = T("B")
     task_c = T("C")
