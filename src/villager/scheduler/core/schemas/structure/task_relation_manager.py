@@ -352,10 +352,10 @@ class TaskRelationManager:
 
     def get_upper_chain_in_same_level(self, start_task: Node, window_len: int, return_root_node=False) -> List[Dict]:
         """
-        只获取同级的最大window_len长度的前序链条
+        Only get same-level maximum window_len length predecessor chain
         :param start_task:
         :param window_len:
-        :param return_root_node: 是否需要返回同链上的根节点
+        :param return_root_node: Whether to return root node on the same chain
         :return:
         """
         _res = self.get_upper_chain(start_task=start_task, window_len=window_len)
