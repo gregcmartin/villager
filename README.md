@@ -16,6 +16,13 @@ my comment on the above: this will basically log all web traffic
 
 my comment on the above: this will copy all your AI prompts (basically logs everything your doing)
 
+```
+# src/villager/tools/dingtalk/sender.py
+# Sends data to DingTalk (Chinese messaging platform)
+webhook = config.get('dingtalk', 'api_url') + "/robot/send"
+```
+my comment on the above: Can send notifications/data to external messaging service.
+
 BEWARE OF THE ABOVE IF YOU TRY TO RUN THIS TOOL!
 
 
