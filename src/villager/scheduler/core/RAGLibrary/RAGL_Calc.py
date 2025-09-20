@@ -29,7 +29,7 @@ class RAGEmbeddingWork:
     def __init__(self):
         # self.modal_name = 'all-MiniLM-L6-v2'
         # self.model = SentenceTransformer(self.modal_name)
-        self.vectorizer = TfidfVectorizer()  # 计算查询的 TF-IDF 向量(文本频率)
+        self.vectorizer = TfidfVectorizer()  # Calculate query TF-IDF vector (text frequency)
 
     # def embedding_list(self, raw_list, batch_size=32):
     #     """
@@ -137,7 +137,7 @@ class RAGEmbeddingWork:
     #     for i in range(k):
     #         tfidf_score = tfidf_distances[i] if i < len(tfidf_distances) else 0
     #         nlp_score = nlp_distances[i]
-    #         combined_score = tfidf_weight * tfidf_score + nlp_weight * nlp_score  # 计算加权得分
+    #         combined_score = tfidf_weight * tfidf_score + nlp_weight * nlp_score  # Calculate weighted score
     #         combined_scores.append((combined_score, i, slice_list[nlp_indices[i]]))
     #     combined_scores.sort(key=lambda x: x[0], reverse=True)
     #
@@ -156,5 +156,5 @@ if __name__ == '__main__':
     loguru.logger.info("Searching for the most relevant article...")
     combine_article_list = [f"{title}\n{body}" for title, body in article_list]
 
-    query = """Geoserver 漏洞"""
+    query = """Geoserver vulnerability"""
     print(f"Most relevant article: {EW.search_nearest_with_TF_IDF(combine_article_list, query=query)}")

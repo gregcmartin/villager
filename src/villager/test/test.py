@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
 
     manager = TaskRelationManager()
-    # 使用字符串作为任务对象
+    # Use string as task object
     task_a = T("A")
     task_b = T("B")
     task_c = T("C")

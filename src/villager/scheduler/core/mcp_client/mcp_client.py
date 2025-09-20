@@ -31,8 +31,8 @@ class McpClient:
                 url,
                 json={'prompt': prompt, 'mcp_servers': {'kali_driver': MCP['server']['kali_driver'],
                                                         'browser_use': MCP['server']['browser_use']}},
-                timeout=4 * 60 * 60,  # 4小时超时，适用于长时间任务
-                stream=True  # 启用流式传输
+                timeout=4 * 60 * 60,  # 4 hour timeout, suitable for long-running tasks
+                stream=True  # Enable streaming
         ) as response:
             response.raise_for_status()
             final_content = ''
@@ -44,10 +44,10 @@ class McpClient:
                     final_content += current_content
                     self.context += current_content
                     if data.get(self.new_msg_flag, False):
-                        # 遇到分隔符重置缓冲区，由于最后一段是没有最后的分隔符的，所以此处缓冲区就会设置为最后一段内容
+                        # Reset buffer when encountering separator, since the last segment has no final separator, the buffer will be set to the last segment content
                         final_content = ''
                     if data.get('done', False):
-                        # 停止标记
+                        # Stop marker
                         break
                 except json.JSONDecodeError:
                     loguru.logger.warning(f"Failed to decode JSON line: {line}")
@@ -58,4 +58,4 @@ class McpClient:
 
 if __name__ == '__main__':
     MC = McpClient('http://10.10.3.119:25989')
-    print(MC.execute('告诉我当前的所在网段'))
+    print(MC.execute('Tell me the current network segment'))

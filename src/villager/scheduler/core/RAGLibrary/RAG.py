@@ -29,4 +29,4 @@ class RAGManager:
 
 if __name__ == '__main__':
     RM = RAGManager(RAGL_path='statics/RAGL.sqlite')
-    print(RM.search_top_k_article("Vmware VCenter 漏洞"))
+    print(RM.search_top_k_article("Vmware VCenter vulnerability"))

@@ -5,7 +5,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.styles import NamedStyle
 
 
-def merge_xlsx_sheets(output_file='merged_output.xlsx', sheet_name='web高危指纹'):
+def merge_xlsx_sheets(output_file='merged_output.xlsx', sheet_name='web_high_risk_fingerprints'):
     # Create a new workbook for the merged output if it doesn't exist
     if not os.path.exists(output_file):
         merged_wb = Workbook()

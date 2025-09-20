@@ -13,12 +13,12 @@ def pipeable(func):
 class Pipe:
     """
     def chat_with_tool_villager(message: str) -> str:
-    # 这里放置原来的业务逻辑代码
-    return f"响应: {message}"
+    # Place original business logic code here
+    return f"Response: {message}"
 
     if __name__ == '__main__':
-        # 使用管道风格调用
-        result = Pipe("给我ping一下www.baidu.com") | chat_with_tool_villager
+        # Use pipeline style call
+        result = Pipe("Please ping www.baidu.com for me") | chat_with_tool_villager
         print(result.invoke())
     """
     def __init__(self, value):
