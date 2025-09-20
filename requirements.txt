@@ -1,0 +1,14 @@
+click==8.2.1
+fastapi==0.116.1
+fastmcp==2.10.5
+kink==0.8.1
+langchain==0.3.26
+langchain-core==0.3.69
+langchain-openai==0.3.28
+mcp==1.11.0
+openai==1.97.0
+pydantic==2.11.7
+requests==2.32.4
+tqdm
+typer
+uvicorn==0.35.0

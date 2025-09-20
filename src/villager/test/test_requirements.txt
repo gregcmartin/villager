@@ -1,0 +1,10 @@
+jsmin
+loguru
+requests
+pytest
+kink
+langchain_core
+sentence_transformers
+tqdm
+langchain
+langchain_openai

@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include requirements.txt
+recursive-include src/villager *.py
+recursive-include src/villager/scheduler/core/RAGLibrary/statics *
+recursive-include src/villager/test *.ipynb
+recursive-exclude src/villager *.pyc
+recursive-exclude src/villager __pycache__
