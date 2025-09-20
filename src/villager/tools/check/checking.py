@@ -34,32 +34,32 @@ class checkEnv:
             ip = socket.gethostbyname("www.baidu.com")
             loguru.logger.info(f"DNS: www.baidu.com -> {ip}")
         except Exception as e:
-            loguru.logger.error("DNS解析失败，请检查网络环境")
-            raise Exception("DNS解析失败，请检查网络环境")
-        loguru.logger.success("DNS正常")
+            loguru.logger.error("DNS resolution failed, please check network environment")
+            raise Exception("DNS resolution failed, please check network environment")
+        loguru.logger.success("DNS normal")
 
         try:
             requests.get("http://www.baidu.com")
-            loguru.logger.success("通联国内互联网正常")
+            loguru.logger.success("Domestic internet connection normal")
         except Exception as e:
-            raise Exception("实际通联网络环境测试异常")
+            raise Exception("Actual network environment test abnormal")
         try:
             if proxy:
-                loguru.logger.info('使用代理')
+                loguru.logger.info('Using proxy')
                 cn_res = requests.get("http://www.baidu.com", proxies={"http": proxy, "https": proxy})
-                loguru.logger.success("通联国内互联网代理正常")
+                loguru.logger.success("Domestic internet proxy connection normal")
                 if len(cn_res.content) < 1:
-                    loguru.logger.error(f"通联国内互联网代理异常 length:{len(cn_res.content)}")
-                    raise Exception("通联国内互联网代理异常")
+                    loguru.logger.error(f"Domestic internet proxy connection abnormal length:{len(cn_res.content)}")
+                    raise Exception("Domestic internet proxy connection abnormal")
                 res = requests.get("http://www.google.com", proxies={"http": proxy, "https": proxy})
                 if len(res.content) < 1:
-                    loguru.logger.error(f"通联国外互联网代理异常 length:{len(res.content)}")
-                    raise Exception("通联国外互联网代理异常")
-                loguru.logger.success(f"通联国外互联网代理正常 length:{len(res.content)}")
+                    loguru.logger.error(f"International internet proxy connection abnormal length:{len(res.content)}")
+                    raise Exception("International internet proxy connection abnormal")
+                loguru.logger.success(f"International internet proxy connection normal length:{len(res.content)}")
         except Exception as e:
-            loguru.logger.error("通联网络环境代理测试异常")
-            raise Exception("实际通联网络环境代理测试异常")
-        # 获取网卡信息
+            loguru.logger.error("Network environment proxy test abnormal")
+            raise Exception("Actual network environment proxy test abnormal")
+        # Get network interface information
         import psutil
         net = psutil.net_if_addrs()
         for k, v in net.items():
@@ -67,19 +67,19 @@ class checkEnv:
                 if item.family == 2:
                     loguru.logger.info(f"Network: {k} {item.address}")
                     break
-        loguru.logger.success("网络环境正常")
+        loguru.logger.success("Network environment normal")
 
     def checkCamera(self):
         if self.need_camera:
             import cv2
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
-                loguru.logger.error("摄像头无法打开")
-                raise Exception("摄像头无法打开")
-            # 获取摄像头的分辨率和总共的摄像头数量
+                loguru.logger.error("Camera cannot be opened")
+                raise Exception("Camera cannot be opened")
+            # Get camera resolution and total number of cameras
             width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
             height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
-            # 获取系统中摄像头的总数量
+            # Get total number of cameras in the system
             count = 0
             while True:
                 test_cap = cv2.VideoCapture(count)
@@ -88,25 +88,25 @@ class checkEnv:
                 test_cap.release()
                 count += 1
             loguru.logger.info(f"Camera: {width}x{height}, {count} cameras")
-            # 拍摄一张图片
-            loguru.logger.info("正在测试摄像头...")
+            # Take a picture
+            loguru.logger.info("Testing camera...")
             ret, frame = cap.read()
             if not ret or frame is None:
-                loguru.logger.error("摄像头无法拍摄图片")
-                raise Exception("摄像头无法拍摄图片")
-            loguru.logger.success("摄像头正常")
-            cap.release()  # 释放摄像头
+                loguru.logger.error("Camera cannot capture image")
+                raise Exception("Camera cannot capture image")
+            loguru.logger.success("Camera normal")
+            cap.release()  # Release camera
 
     def checkMemory(self):
         import psutil
         memory = psutil.virtual_memory().total / 1024 / 1024
         current_used_memory = psutil.virtual_memory().used / 1024 / 1024
         if memory-current_used_memory < self.min_memory:
-            loguru.logger.error(f"内存不足{self.min_memory}MB，当前剩余内存{memory - current_used_memory}MB")
-            raise Exception("内存不足")
+            loguru.logger.error(f"Insufficient memory {self.min_memory}MB, current available memory {memory - current_used_memory}MB")
+            raise Exception("Insufficient memory")
         used_rate = current_used_memory / memory * 100
         loguru.logger.info(f"Memory: {current_used_memory}/{memory}MB {used_rate}%")
-        loguru.logger.success("内存正常")
+        loguru.logger.success("Memory normal")
 
 
 if __name__ == '__main__':
