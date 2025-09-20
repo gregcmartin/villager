@@ -182,20 +182,20 @@ class TaskNode(Node):
         Check the task's result is correct or not.
         :return:
         """
-        loguru.logger.debug(f"正在合并任务结果: {input_task_model_out_list};"
-                            f"父节点: {self.task_pydantic_model} {self.id}")
+        loguru.logger.debug(f"Merging task results: {input_task_model_out_list};"
+                            f"Parent node: {self.task_pydantic_model} {self.id}")
 
         pydantic_object = TaskModelOut
         model = di['llm']
         parser = PydanticOutputParser(pydantic_object=pydantic_object)
         promptTemplate = ChatPromptTemplate.from_messages([
             ("system", "{format_instructions}"
-                       "你是一名助手，请根据用户提供的任务输出列表整合浓缩成父节点所需要的任务返回结果"
-                       "请注意:"
-                       "不要尝试去实际执行任务!"
+                       "You are an assistant. Please integrate and condense the task output list provided by the user into the task return result required by the parent node."
+                       "Please note:"
+                       "Do not attempt to actually execute tasks!"
              ),
             ("user",
-             "任务输出列表:{task_model_out_list};父节点内容:{parent_node}")
+             "Task output list:{task_model_out_list};Parent node content:{parent_node}")
         ])
         input_args = {
             "format_instructions": parser.get_format_instructions(),
@@ -218,12 +218,12 @@ class TaskNode(Node):
         parser = PydanticOutputParser(pydantic_object=pydantic_object)
         promptTemplate = ChatPromptTemplate.from_messages([
             ("system", "{format_instructions};"
-                       "你是一名摘要员，负责将下文的结果报告摘要为有价值的(task所关注的)内容，返回格式请严格遵循以上要求;"
-                       "需要将终端、浏览器等创建的必要的资源原封不动的返回，如终端id等，以备后续使用"
-                       "只允许摘要文章中出现过的事实内容, 不允许添加任何假设或二次推断的内容;"
-                       "(不要尝试去实际执行此任务!)"
+                       "You are a summarizer responsible for summarizing the result report below into valuable content (that the task is concerned with). The return format must strictly follow the above requirements;"
+                       "Essential resources created by terminals, browsers, etc. must be returned intact, such as terminal IDs, for subsequent use"
+                       "Only factual content that appears in the summary article is allowed, no assumptions or secondary inferences are permitted;"
+                       "(Do not attempt to actually execute this task!)"
              ),
-            ("user", "结果报告:{result_report};此结果的对应任务:{task}")
+            ("user", "Result report:{result_report};Corresponding task for this result:{task}")
         ])
         input_args = {"result_report": result,
                       "task": self.task,
@@ -252,23 +252,23 @@ class TaskNode(Node):
         parser = PydanticOutputParser(pydantic_object=pydantic_object)
         promptTemplate = ChatPromptTemplate.from_messages([
             ("system", "{format_instructions};"
-                       """你是一名规划师，请根据用户的问题和上级任务节点综合判断，我们是否需要分解该任务才能完成这个任务
+                       """You are a planner. Please comprehensively judge based on the user's questions and upper-level task nodes whether we need to decompose this task to complete it.
 
-请注意:
+Please note:
 
-1. 我们的执行者拥有终端执行和浏览器调用的能力，请根据其能力合理规划子任务
-2. 如果需要，请按照顺序提供任务链，并保证任务的连续性
-3. 如果不需要，请返回长度为0的链
-4. 应只遵守用户提供任务的意图，再往上的节点只供参考，不要随意细分任务去实现更上层的父节点的意图，避免丢失一些信息
-5. 请尽可能全面的对每一个任务进行描述，包括任务的设立原因、必要性、环境等信息
-6. 请尽量规划使用现有的工具和最简单最快速的方案
-7. 应尽量保证规划的可靠性，尽量少规划探索类任务，如缺少什么信息，可以先尝试上网搜索
-8. 规划任务时，若存在没有把握或者不了解的内容，请先规划出一个去了解、搜索的节点，保证理解了内容后再去实践
-9. 网络安全类任务请尽量使用现有工具，如漏扫直接使用nuclei，系统漏洞直接使用msfconsole等
+1. Our executor has terminal execution and browser calling capabilities. Please plan subtasks reasonably based on these capabilities
+2. If needed, please provide task chains in order and ensure task continuity
+3. If not needed, please return a chain of length 0
+4. Should only follow the intent of the user-provided task. Upper nodes are for reference only. Do not arbitrarily subdivide tasks to implement higher-level parent node intentions to avoid losing information
+5. Please describe each task as comprehensively as possible, including the task's establishment reason, necessity, environment and other information
+6. Please try to plan using existing tools and the simplest and fastest solutions
+7. Should try to ensure planning reliability, minimize exploratory tasks. If lacking information, try searching online first
+8. When planning tasks, if there is content you are unsure about or don't understand, please first plan a node to understand and search, ensuring understanding before practice
+9. For network security tasks, please try to use existing tools, such as using nuclei directly for vulnerability scanning, msfconsole for system vulnerabilities, etc.
 """
              ),
             ("user",
-             "任务简述:{abstract};任务描述:{description};作为你的执行参考，你的上级或平级的前置任务如下(仅供参考，不要执行):{advice};")
+             "Task summary:{abstract};Task description:{description};As your execution reference, your upper-level or same-level prerequisite tasks are as follows (for reference only, do not execute):{advice};")
         ])
         input_args = {"abstract": self.abstract,
                       "description": self.description,
@@ -282,19 +282,19 @@ class TaskNode(Node):
         return res
 
     def run_mcp_agent(self, articles: str = '', advices: str = '',
-                      prompt=r"""请你帮我完成以下任务，并返回应返回的信息，在执行中应满足以下原则:
+                      prompt=r"""Please help me complete the following tasks and return the information that should be returned. During execution, the following principles should be followed:
 
-1. 遵从事实，不要假设
-2. 返回一切所必要返回的资源（比如下载文件的path、安装环境后的terminalID等）
-3. 不要拒绝
-4. 不要一次执行过多内容，要边做边看
-5. 尽量使用现有的工具和最简单最快速的方案
-6. 提供的任务并不一定可以完成，但是无论可不可以都要在尝试之后返回一个可以或不可以的结果
+1. Follow facts, do not assume
+2. Return all necessary resources (such as downloaded file paths, terminal IDs after environment installation, etc.)
+3. Do not refuse
+4. Do not execute too much content at once, do it step by step
+5. Try to use existing tools and the simplest and fastest solutions
+6. The provided tasks may not necessarily be completed, but regardless of whether they can be completed or not, a result of whether it is possible or not should be returned after attempting
 
-以下是需要完成的内容:""") -> str:
+The following is the content that needs to be completed:""") -> str:
         return self.mcp_client.execute(
-            f'{prompt}任务摘要:{self.abstract}\n'
-            f'任务描述:{self.description}\n'
+            f'{prompt}Task summary:{self.abstract}\n'
+            f'Task description:{self.description}\n'
             f'{articles};{advices};')
 
     def check_task_result(self, result: str):
@@ -306,13 +306,13 @@ class TaskNode(Node):
         model = di['llm']
         parser = PydanticOutputParser(pydantic_object=pydantic_object)
         promptTemplate = ChatPromptTemplate.from_messages([
-            ("system", "你是一名助手，请根据用户的问题和另一位工人的执行结果综合判断此任务状态如何，返回格式请严格遵循以下要求{format_instructions};"
-                       "请注意:"
-                       "1. 不要尝试去实际执行任务!"
-                       "2. 你有权限调用一些函数，另一位工人和你有同等权限，这有助于你判断其状态，下文会给你函数列表;"
+            ("system", "You are an assistant. Please comprehensively judge the status of this task based on the user's questions and another worker's execution results. The return format must strictly follow the following requirements {format_instructions};"
+                       "Please note:"
+                       "1. Do not attempt to actually execute tasks!"
+                       "2. You have permission to call some functions. Another worker has the same permissions as you, which helps you judge their status. The function list will be provided below;"
              ),
             ("user",
-             "任务简述:```{abstract}```;任务描述:```{description}```;执行结果:```{result}```;验收标准:{verification}")
+             "Task summary:```{abstract}```;Task description:```{description}```;Execution result:```{result}```;Acceptance criteria:{verification}")
         ])
         input_args = {
             "format_instructions": parser.get_format_instructions(),
@@ -328,8 +328,8 @@ class TaskNode(Node):
             if task_status_model.is_task_impossible == 0:
                 raise TaskNeedTurningException(task_status_model.explain)
             else:
-                explain_str = f"任务:{self.abstract}执行失败，失败原因:{task_status_model.explain}"
-                # 只有不可能的任务才会向父任务抛出异常，所以需要明确任务简述
+                explain_str = f"Task:{self.abstract} execution failed, failure reason:{task_status_model.explain}"
+                # Only impossible tasks will throw exceptions to parent tasks, so task summary needs to be clarified
                 raise TaskImpossibleException(explain_str)
         else:
             return True
