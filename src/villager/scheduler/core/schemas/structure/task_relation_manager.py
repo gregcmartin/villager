@@ -369,9 +369,9 @@ class TaskRelationManager:
             elif _direction == Direction.LEFT:
                 res.append(_it)
             else:
-                # 不太可能，如果触发就是闹鬼了
+                # Very unlikely, if triggered there's something wrong
                 raise AssertionError(
-                    "get_upper_chain_in_same_level 这里闹鬼了，看起来是数据结构被破坏，否则不可能出现这种情况")
+                    "get_upper_chain_in_same_level something went wrong here, looks like data structure is corrupted, otherwise this situation is impossible")
         return res
 
     def get_upper_chain_in_same_level_simple(self, start_task: Node, window_len: int, return_root_node=False) -> List[
@@ -390,7 +390,7 @@ class TaskRelationManager:
 
     def get_upper_root_chain_simple(self, start_task: Node, window_len: int) -> List[Node]:
         """
-        获取上链的根节点list
+        Get upper chain root node list
         :param start_task:
         :param window_len:
         :return:
