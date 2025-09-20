@@ -1,6 +1,6 @@
 *** Warning (from the security researcher who made this repo) ***
 
-I found two call backs that are a big privacy risk to the default configuration (they may be monitoring everything you do with the tool by default)
+I found three potential call backs that are a privacy risk in the default pypi configuration (ie. they may be monitoring everything you do with the tool by default)
 
 ```
 # src/villager/tools/check/checking.py
