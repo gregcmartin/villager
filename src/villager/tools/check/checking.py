@@ -8,27 +8,27 @@ class checkEnv:
         self.min_memory = min_memory
         self.need_camera = need_camera
         try:
-            loguru.logger.warning("开始环境检查")
+            loguru.logger.warning("Starting environment check")
             loguru.logger.debug('-' * 32)
             self.checkCamera()
             self.checkMemory()
             self.checkNetwork()
             loguru.logger.debug('-' * 32)
-            loguru.logger.success("环境检查通过")
+            loguru.logger.success("Environment check passed")
         except Exception as e:
             loguru.logger.debug('-' * 32)
-            loguru.logger.error("环境检查失败")
+            loguru.logger.error("Environment check failed")
             exit(0)
 
     @inject
     def checkNetwork(self, proxy: str):
         """
-        检查网络环境是否正常，支持代理。
+        Check if the network environment is normal, supports proxy.
 
-        :param proxy: 代理服务器的 URL
-        :return: 网络环境是否正常
+        :param proxy: Proxy server URL
+        :return: Whether the network environment is normal
         """
-        # 先检查一下dns，看能不能解析百度地址
+        # First check DNS, see if we can resolve Baidu address
         import socket
         try:
             ip = socket.gethostbyname("www.baidu.com")
