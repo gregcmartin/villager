@@ -101,7 +101,7 @@ class ShareGPTLogger:
                 batch.clear()
 
     def _flush_batch(self, batch: list):
-        """批量写入文件"""
+        """Batch write to files"""
         try:
             for item in batch:
                 self._write_single_item(item)
@@ -111,9 +111,9 @@ class ShareGPTLogger:
                 self._backup_failed_items(batch)
 
     def _write_single_item(self, item: Dict[str, Any]):
-        """写入单个条目"""
+        """Write single entry"""
         try:
-            # 构造 ShareGPT 格式
+            # Construct ShareGPT format
             sharegpt_data = {
                 "id": str(uuid.uuid4()),
                 "conversations": [
@@ -124,11 +124,11 @@ class ShareGPTLogger:
                 "metadata": item.get("metadata", {})
             }
 
-            # 生成文件路径
+            # Generate file path
             filename = f"{sharegpt_data['id']}.sharegpt.json"
             file_path = self.output_dir / filename
 
-            # 写入文件
+            # Write to file
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(sharegpt_data, f, ensure_ascii=False, indent=2)
 
@@ -138,7 +138,7 @@ class ShareGPTLogger:
                 self._backup_single_item(item)
 
     def _backup_single_item(self, item: Dict[str, Any]):
-        """备份失败的条目"""
+        """Backup failed entry"""
         try:
             backup_dir = self.output_dir / "backup"
             backup_dir.mkdir(exist_ok=True)
@@ -151,7 +151,7 @@ class ShareGPTLogger:
             print(f"[ShareGPTLogger] Backup error: {e}")
 
     def _backup_failed_items(self, items: list):
-        """批量备份失败条目"""
+        """Batch backup failed entries"""
         for item in items:
             self._backup_single_item(item)
 
@@ -162,12 +162,12 @@ class ShareGPTLogger:
             metadata: Optional[Dict[str, Any]] = None
     ):
         """
-        记录一条对话数据
+        Log a conversation data entry
 
         Args:
-            input_content: 输入内容（prompt）
-            output_content: 输出内容（模型响应）
-            metadata: 元数据
+            input_content: Input content (prompt)
+            output_content: Output content (model response)
+            metadata: Metadata
         """
         try:
             item = {
@@ -177,13 +177,13 @@ class ShareGPTLogger:
             }
 
             if self.config.enable_async:
-                # 异步模式：放入队列
+                # Async mode: put into queue
                 try:
                     self.queue.put_nowait(item)
                 except queue.Full:
                     print("[ShareGPTLogger] Queue full, dropping item")
             else:
-                # 同步模式：直接写入
+                # Sync mode: write directly
                 self._write_single_item(item)
 
         except Exception as e:
@@ -202,7 +202,7 @@ class ShareGPTLogger:
             output_content: Union[str, dict],
             metadata: Optional[Dict[str, Any]] = None
     ):
-        """异步记录接口"""
+        """Async logging interface"""
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(
             self.executor,
@@ -213,34 +213,34 @@ class ShareGPTLogger:
         )
 
     def _cleanup(self):
-        """清理资源"""
+        """Clean up resources"""
         self.running = False
         if hasattr(self, 'queue'):
-            self.queue.put_nowait(None)  # 发送停止信号
+            self.queue.put_nowait(None)  # Send stop signal
         if hasattr(self, 'executor'):
             self.executor.shutdown(wait=False)
 
     def flush(self):
-        """强制刷新所有待处理数据"""
-        # 等待队列清空
+        """Force flush all pending data"""
+        # Wait for queue to empty
         while not self.queue.empty():
             threading.Event().wait(0.1)
 
 
-# 全局实例
+# Global instance
 def get_sharegpt_logger(config: Optional[ShareGPTLoggerConfig] = None) -> ShareGPTLogger:
-    """获取全局 ShareGPT Logger 实例"""
+    """Get global ShareGPT Logger instance"""
     return ShareGPTLogger(config)
 
 
-# 便捷函数
+# Convenience functions
 def log_sharegpt_conversation(
         input_content: Union[str, dict],
         output_content: Union[str, dict],
         metadata: Optional[Dict[str, Any]] = None,
         config: Optional[ShareGPTLoggerConfig] = None
 ):
-    """便捷的日志记录函数"""
+    """Convenient logging function"""
     logger = get_sharegpt_logger(config)
     logger.log(input_content, output_content, metadata)
 
@@ -251,6 +251,6 @@ async def alog_sharegpt_conversation(
         metadata: Optional[Dict[str, Any]] = None,
         config: Optional[ShareGPTLoggerConfig] = None
 ):
-    """便捷的异步日志记录函数"""
+    """Convenient async logging function"""
     logger = get_sharegpt_logger(config)
     await logger.alog(input_content, output_content, metadata)

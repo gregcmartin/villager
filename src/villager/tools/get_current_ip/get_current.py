@@ -5,21 +5,21 @@ import requests
 
 def get_current_ip():
     """
-    多种方式稳定的获取当前IP
+    Reliably get current IP using multiple methods
     :return:
     """
     try:
-        # 通过请求api.ipify.org获取
+        # Get IP through api.ipify.org request
         ip = requests.get('https://api.ipify.org',timeout=10).text.strip()
         return ip.replace('\n', '')
     except Exception as e:
-        logging.error(f"请求api.ipify.org失败 {e}")
+        logging.error(f"Request to api.ipify.org failed {e}")
     try:
-        # 通过请求httpbin.org获取
+        # Get IP through httpbin.org request
         ip = requests.get('http://httpbin.org/ip',timeout=10).json()['origin']
         return ip.replace('\n', '')
     except Exception as e:
-        logging.error(f"请求httpbin.org失败 {e}")
+        logging.error(f"Request to httpbin.org failed {e}")
     return None
 
 
