@@ -78,7 +78,7 @@ class TaskNode(Node):
         """
         loguru.logger.debug('Entry branch_and_execute.')
         task_chain = branch_requirement.task_chain
-        # 如果has_dependency为True，那么顺序执行，如果为False，那么多线程运行，并等待所有结果结束后才一起返回，其余逻辑均相同
+        # If has_dependency is True, execute sequentially; if False, run multi-threaded and wait for all results to finish before returning together, other logic remains the same
 
         tasks_classed: List[TaskNode] = []
         task_chain_output: List[TaskModelOut] | None = []
@@ -123,7 +123,7 @@ class TaskNode(Node):
                     loguru.logger.success(f"Task {self.task_pydantic_model} is successful, result: {result}")
                     return result
             except TaskNeedTurningException as e:
-                advices += f"此任务你已经尝试过了，但是没有成功，以下是给此次执行的建议:{e}"
+                advices += f"You have already tried this task but failed. Here are suggestions for this execution: {e}"
             except TaskImpossibleException as e:
                 self.task_pydantic_model = self.task_pydantic_model.copy(update={
                     "task_status_model": TaskStatus.ERROR,
@@ -131,7 +131,7 @@ class TaskNode(Node):
                 raise e
             except Exception as e:
                 raise e
-        raise TaskImpossibleException(f"此任务已经尝试{max_try}次了，均没有成功")
+        raise TaskImpossibleException(f"This task has been attempted {max_try} times, all unsuccessful")
 
     def execute(self, rebranch_prompt='') -> TaskModelOut:
         """

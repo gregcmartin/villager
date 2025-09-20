@@ -43,24 +43,24 @@ class Task:
         return self
 
 
-# 全局任务状态管理器
+# Global task status manager
 task_manager: Dict[str, dict] = {}
 
 
 def boot(app: FastAPI):
-    # 创建任务并后台运行
+    # Create task and run in background
     async def run_background_task(task_id, abstract, description, verification):
         graph_name = f'./{task_id}.mermaid'
 
         def blocking_task():
             try:
-                # 检查任务是否已被取消
+                # Check if task has been cancelled
                 if task_manager[task_id]['status'] == 'cancelled':
                     return
 
                 with global_llm():
                     with TRM() as trm:
-                        # 检查任务是否已被取消
+                        # Check if task has been cancelled
                         if task_manager[task_id]['status'] == 'cancelled':
                             return
                         mcp_client = McpClient(mcp_client_base_url=mcp_client_baseurl, task_id=task_id)
@@ -71,7 +71,7 @@ def boot(app: FastAPI):
                             graph_name=graph_name
                         )
                         task_manager[task_id]['mcp_client'] = mcp_client
-                        # 检查任务是否已被取消
+                        # Check if task has been cancelled
                         if task_manager[task_id]['status'] == 'cancelled':
                             return
                         for i in range(3):
@@ -81,7 +81,7 @@ def boot(app: FastAPI):
                             except Exception as e:
                                 traceback.print_exc()
 
-                        # 检查任务是否已被取消
+                        # Check if task has been cancelled
                         if task_manager[task_id]['status'] == 'cancelled':
                             return
 
@@ -110,7 +110,7 @@ def boot(app: FastAPI):
     @app.post("/task")
     async def post_task(abstract: str, description: str, verification: str):
 
-        # 启动后台任务
+        # Start background task
         asyncio.create_task(run_background_task(SERVER_UUID, abstract, description, verification))
 
         return {"task_id": SERVER_UUID}
@@ -160,7 +160,7 @@ def boot(app: FastAPI):
         if task_info['status'] != 'running':
             return {"message": f"Task is {task_info['status']}"}, 400
 
-        # 标记任务为已取消
+        # Mark task as cancelled
         task_info['status'] = 'cancelled'
         return {"message": f"Task {task_id} has been marked as cancelled"}
 
