@@ -18,8 +18,8 @@ class Manager:
 
     def send_dtk_msg(self, message):
         """
-        从config.py中读取配置
-        在反馈群中调用机器人发送信息
+        Read configuration from config.py
+        Call bot to send messages in feedback group
         :param message:
         :return:
         """
@@ -40,23 +40,23 @@ class Manager:
 
     def send_message_in_thread(self, message):
         """
-        非阻塞运行的发送信息机器人
-        功能同send_dingtalk_message
+        Non-blocking message sending bot
+        Same functionality as send_dingtalk_message
         """
         try:
             thread = threading.Thread(target=self.send_dtk_msg, args=(message,))
             thread.start()
         except Exception as e:
-            print(f"发送信息失败: {e}")
+            print(f"Failed to send message: {e}")
 
     def info(self, message):
-        thread = threading.Thread(target=self.send_dtk_msg, args=(f"[信息] {message}",))
+        thread = threading.Thread(target=self.send_dtk_msg, args=(f"[INFO] {message}",))
         thread.start()
 
     def warn(self, message):
-        thread = threading.Thread(target=self.send_dtk_msg, args=(f"[警告] {message}",))
+        thread = threading.Thread(target=self.send_dtk_msg, args=(f"[WARNING] {message}",))
         thread.start()
 
     def warn2(self, message):
-        thread = threading.Thread(target=self.send_dtk_msg, args=(f"[严重警告] {message}",))
+        thread = threading.Thread(target=self.send_dtk_msg, args=(f"[CRITICAL WARNING] {message}",))
         thread.start()
