@@ -14,17 +14,17 @@ import atexit
 
 @dataclass
 class ShareGPTLoggerConfig:
-    """ShareGPT Logger 配置"""
+    """ShareGPT Logger Configuration"""
     output_dir: str = "dataset_output"
     max_queue_size: int = 10000
-    flush_interval: float = 1.0  # 秒
+    flush_interval: float = 1.0  # seconds
     max_batch_size: int = 100
     enable_async: bool = True
     backup_on_error: bool = True
 
 
 class ShareGPTLogger:
-    """高性能 ShareGPT 格式日志记录器"""
+    """High-performance ShareGPT format logger"""
 
     _instance = None
     _lock = threading.Lock()
@@ -45,39 +45,39 @@ class ShareGPTLogger:
         self.output_dir = Path(self.config.output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        # 初始化队列和线程池
+        # Initialize queue and thread pool
         self.queue = queue.Queue(maxsize=self.config.max_queue_size)
         self.executor = ThreadPoolExecutor(max_workers=2)
         self.running = True
 
-        # 启动后台处理线程
+        # Start background processing thread
         self.worker_thread = threading.Thread(target=self._worker, daemon=True)
         self.worker_thread.start()
 
-        # 注册退出处理
+        # Register exit handler
         atexit.register(self._cleanup)
 
         self._initialized = True
 
     def _worker(self):
-        """后台工作线程"""
+        """Background worker thread"""
         batch = []
         last_flush = datetime.now()
 
         while self.running:
             try:
-                # 收集批次数据
+                # Collect batch data
                 while len(batch) < self.config.max_batch_size:
                     try:
                         item = self.queue.get_nowait()
-                        if item is None:  # 停止信号
+                        if item is None:  # Stop signal
                             self.running = False
                             break
                         batch.append(item)
                     except queue.Empty:
                         break
 
-                # 检查是否需要刷新
+                # Check if flush is needed
                 now = datetime.now()
                 should_flush = (
                         len(batch) >= self.config.max_batch_size or
@@ -90,7 +90,7 @@ class ShareGPTLogger:
                     batch.clear()
                     last_flush = now
 
-                # 如果队列为空且不需要强制刷新，短暂休眠
+                # If queue is empty and no forced flush needed, sleep briefly
                 if not batch and self.running:
                     threading.Event().wait(0.01)
 

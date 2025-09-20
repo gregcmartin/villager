@@ -105,9 +105,9 @@ class ToolsManager:
     def NLP_unserialize(self, json_str: str):
         """
         Get a function from a JSON string.
-        用户可能输入:
+        User might input:
         {"name":"plus_a_b","parameters":{"a":123,"b":234}}
-        那么我们则需要从注册的函数池里找到这个函数然后直接调用
+        Then we need to find this function from the registered function pool and call it directly
         :param json_str:
         :return:
         """
@@ -176,4 +176,3 @@ def extract_json_with_positions(input_string):
         results.append((match_str, match.group()))
 
     return results
-
